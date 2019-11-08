@@ -1,0 +1,17 @@
+.container {
+    margin: 5em;
+    width: 30%;
+}
+
+.god-app {
+    margin: 5em;
+    width: 60%;
+}
+
+.align-right {
+    text-align: right;
+}
+
+.god-app .btn {
+    margin-left: 20px;;
+}
