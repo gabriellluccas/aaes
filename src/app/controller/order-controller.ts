@@ -1,9 +1,9 @@
 import Controller from "./controller";
-import Order from "../model/order";
-import { getUrl, returnEmployeeByName } from "../../other/helpers/functions";
+import { getUrl } from "../../other/helpers/functions";
 import Client from "../model/client";
 import EmployeeWaiter from "../../other/employee-hierarchy/employee-waiter";
 import OrderDao from "../dao/order-dao";
+import {findById} from "../../other/models/order-factory";
 
 
 
@@ -14,7 +14,7 @@ class OrderController extends Controller{
 
     async changeDeliveryState(req, res){
         const params = getUrl(req.url).params;
-        const order = await Order.findById(params.orderId);
+        const order = await findById(params.orderId);
         const client = await Client.findById(params.clientId);
         order.addObserver(client);
         switch(params.deliveryState[0]){
@@ -36,7 +36,7 @@ class OrderController extends Controller{
 
     async rollbackDeliveryState(req, res){
         const params = getUrl(req.url).params;
-        const order = await Order.findById(params.orderId);
+        const order = await findById(params.orderId);
         order.rollbackMemento();
         res.end();
     }
@@ -44,7 +44,7 @@ class OrderController extends Controller{
     async requestCancelOrder(req, res){
         const params = getUrl(req.url).params;
         console.log(params);
-        const order = await Order.findById(params.orderId[0]);
+        const order = await findById(params.orderId[0]);
         const employee = new EmployeeWaiter(); 
         employee.cancelOrder(order);
         res.end();

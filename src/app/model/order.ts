@@ -16,46 +16,13 @@ export default class Order{
     private _orderMemento: Array<OrderMemento>;
     private _total: number;
     
-    private constructor(params: any = {}) {
+    constructor(params: any = {}) {
         this.id = params.id;
         this._deliveryState = params.deliveryState || new DeliveryStateAwaitingApproval();
         this.orderMemento = params.orderMemento || new Array<OrderMemento>();
         this._products = params.products || null;
         this._observers = new Array<Observer>();
         this._total = params.total || 0;
-    }
-
-    /* Dao Functions */
-    static async findById(id: number){
-        const order = await OrderDao.selectById(id);
-        const orderMemento = new Array<OrderMemento>();
-        const mementoMap = await OrderDao.selectOrderMementoByIdOrder(order.id)
-            mementoMap.map(
-                element => {
-                    let {id, delivery_state :deliveryState} = element;
-                    deliveryState = returnDeliveryStateByName(deliveryState);
-                    orderMemento.push(new OrderMemento({id, deliveryState}));
-                });
-        order.orderMemento = orderMemento;
-        order.deliveryState = returnDeliveryStateByName(order.delivery_state);
-        return new Order(order);
-    }
-
-    static async newOrder(products: Array<Product>, total: number){
-        const orderId = await OrderDao.insert(total);
-        await products.forEach(async product => {
-            console.log(product);
-            if(product.isCombo){
-                let combo = await ProductDao.selectProductsByComboId(product.id)
-                combo = combo.map(element => {
-                    return OrderDao.insertProductIntoOrder(orderId, element.id);    
-                });
-            } else {
-                return OrderDao.insertProductIntoOrder(orderId, product.id);
-            }
-        });
-        await OrderDao.insertOrderMemento(orderId);
-        return orderId;
     }
 
     async updateDeliveryState(){
@@ -80,7 +47,6 @@ export default class Order{
     set deliveryState(deliveryState: DeliveryState){
         this._deliveryState = deliveryState;
         this.updateDeliveryState();
-        this.pushMemento();
     }
 
     get products(): Array<Product>{
@@ -113,40 +79,30 @@ export default class Order{
 
     /* State Functions */
 
-    cancel(){
-        const deliveryState = this._deliveryState.cancel(this);
+    changeDeliveryState(type, message){
+        const deliveryState = new Function(`() => this._deliveryState.${type}()`);
         if(deliveryState){
-            this.notifyObservers("Your order has been canceled");
+            this.notifyObservers(message);
         }
+    }
+
+    cancel(){
+        this.changeDeliveryState('cancel',"Your order has been canceled");
     }
     
     inProduction(){
-        const deliveryState = this._deliveryState.inProduction(this);
-        if(deliveryState){
-            this.notifyObservers("Your order is in production");
-        }
+        this.changeDeliveryState('inProduction',"Your order is in production");
     }
     
     send(){
-        const deliveryState = this._deliveryState.send(this);
-        if(deliveryState){
-            this.notifyObservers("Your order has been sent");
-        }
+        this.changeDeliveryState('send',"Your order has been sent");
     }
     
     done(){
-        const deliveryState = this._deliveryState.done(this);
-        if(deliveryState){
-            this.notifyObservers("The order is in your home!");
-        }
+        this.changeDeliveryState('done',"The order is in your home!");
     }
 
     /* Memento Functions */
-
-    pushMemento(){
-
-    }
-
     async rollbackMemento(){
         this._deliveryState = this.orderMemento[this.orderMemento.length - 1].deliveryState;
         await OrderDao.updateDeliveryState(this.id, this.deliveryState.name);

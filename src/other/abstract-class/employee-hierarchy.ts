@@ -38,6 +38,14 @@ export default abstract class EmployeeHierarchy extends Person {
         });
     }
     
-    abstract nextDeliveryState(order: Order, cancel?: boolean);
+    templateCancelOrder(order: Order){
+        if(this.cancelOrder(order)){
+            this.sendEmail(`Client cancel this order`, order.id, this.name);
+            order.cancel();
+        } else {
+            this.nextEmployee.cancelOrder(order);
+        }
+    }
+    
     abstract cancelOrder(order: Order);
 }
