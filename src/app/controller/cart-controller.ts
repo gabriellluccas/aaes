@@ -41,7 +41,7 @@ class ProductController extends Controller{
         };
         const paymentMethod: PaymentMethod = classes[method[0]];
         const existingClient = this._clients.find(client => {return client.id == clientId;});
-        const orderId = await existingClient.cart.finish(paymentMethod);
+        const orderId = await existingClient.finish(paymentMethod);
         this._clients.splice( this._clients.indexOf(existingClient), 1 );
         res.setHeader('Content-Type', 'application/json');
         res.end(JSON.stringify({orderId: orderId}));
