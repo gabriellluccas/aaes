@@ -33,10 +33,7 @@ class Routes {
     private routesList(){
         this.routes = [
             {name:'/', callback: ProductController.menuView}, 
-            {name:'/waiter', callback: OrderController.waiterView}, 
-            {name:'/chef', callback: OrderController.chefView}, 
-            {name:'/motoboy', callback: OrderController.motoboyView}, 
-            {name:'/god', callback: OrderController.godView}, 
+            {name:'/view', callback: OrderController.userView}, 
             {name:'/products', callback: ProductController.index}, 
             {name:'/cart/add', callback: CartController.insertProductIntoCart},
             {name:'/view/cart/finish', callback: CartController.finishCartView},

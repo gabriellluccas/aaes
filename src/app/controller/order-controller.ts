@@ -63,26 +63,10 @@ class OrderController extends Controller{
         res.end(JSON.stringify(order));
     }
 
-    waiterView(req, res){
-        super.render('waiter.js', res);
+    userView(req, res){
+        const params = getUrl(req.url).params;
+        super.render(params.view, res);
         res.end();
     }
-
-    chefView(req, res){
-        super.render('chef.js', res);
-        res.end();
-    }
-
-    motoboyView(req, res){
-        super.render('motoboy.js', res);
-        res.end();
-    }
-
-    godView(req, res){
-        super.render('memento.js', res);
-        res.end();
-    }
-
-
 
 } export default OrderController.getInstance();
